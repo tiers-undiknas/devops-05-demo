@@ -80,6 +80,6 @@ describe('Tickets API integration tests', () => {
 
     const res = await request(app).get('/api/v1/reservations');
     expect(res.status).toBe(500);
-    expect(res.body).toEqual({ error: 'Failed to fetch reservations' });
+    expect(res.body).toEqual({ error: 'Failed to fetch reservation' });
   });
 });
