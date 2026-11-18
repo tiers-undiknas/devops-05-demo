@@ -5,7 +5,7 @@ import {
   listActivePromos,
 } from "../../src/services/promo.service.js";
 
-describe("ticket.service unit tests", () => {
+describe("promo.service unit tests", () => {
   it("validates active promo codes and rejects invalid/expired ones", () => {
     expect(validatePromoCode("campus20", 2)).toEqual({
       code: "CAMPUS20",
