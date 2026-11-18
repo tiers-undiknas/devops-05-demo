@@ -2,7 +2,7 @@
 
 Proyek demonstrasi perkuliahan untuk sistem reservasi tiket event (**Ticket Pulse**) berbasis monorepo Node.js (ESM), dirancang untuk mendemonstrasikan praktik **Continuous Integration (CI)** modern menggunakan **GitHub Actions**, **Service Containers (PostgreSQL & Redis)**, **Vitest V8 Coverage Quality Gate**, dan **Docker Multi-Stage Build**.
 
-## Arsitektur Monorepo
+## Arsitektur Monorepo ujicoba
 
 ```text
 ticket-pulse-demo/
@@ -45,6 +45,7 @@ npm run test:coverage
 ```
 
 Konfigurasi Vitest (`backend/vitest.config.js`) menerapkan Quality Gate minimal:
+
 - **Lines**: `70%`
 - **Functions**: `70%`
 - **Branches**: `65%`
@@ -97,30 +98,30 @@ docker compose -f deployments/docker-compose.yml up --build
 export const PROMO_CODES = {
   EARLYBIRD10: { discountRate: 0.1, minSeats: 1, active: true },
   CAMPUS20: { discountRate: 0.2, minSeats: 2, active: true },
-  EXPIRED50: { discountRate: 0.5, minSeats: 1, active: false }
+  EXPIRED50: { discountRate: 0.5, minSeats: 1, active: false },
 };
 
 export function validatePromoCode(code, seatQty) {
-  if (!code || typeof code !== 'string') {
-    throw new Error('Promo code must be a non-empty string');
+  if (!code || typeof code !== "string") {
+    throw new Error("Promo code must be a non-empty string");
   }
   const normalized = code.trim().toUpperCase();
   const promo = PROMO_CODES[normalized];
   if (!promo) {
-    throw new Error('Promo code not found');
+    throw new Error("Promo code not found");
   }
   if (!promo.active) {
-    throw new Error('Promo code is no longer active');
+    throw new Error("Promo code is no longer active");
   }
   if (!Number.isInteger(seatQty) || seatQty < promo.minSeats) {
-    throw new Error('Seat quantity does not meet promo requirement');
+    throw new Error("Seat quantity does not meet promo requirement");
   }
   return { code: normalized, ...promo };
 }
 
 export function applyPromoDiscount(subtotal, code, seatQty) {
-  if (typeof subtotal !== 'number' || subtotal <= 0) {
-    throw new Error('Subtotal must be a positive number');
+  if (typeof subtotal !== "number" || subtotal <= 0) {
+    throw new Error("Subtotal must be a positive number");
   }
   const promo = validatePromoCode(code, seatQty);
   const discountAmount = Math.round(subtotal * promo.discountRate);
@@ -129,7 +130,7 @@ export function applyPromoDiscount(subtotal, code, seatQty) {
     promoCode: promo.code,
     discountRate: promo.discountRate,
     discountAmount,
-    finalPrice
+    finalPrice,
   };
 }
 
@@ -139,7 +140,7 @@ export function listActivePromos() {
     .map(([code, details]) => ({
       code,
       discountPercent: Math.round(details.discountRate * 100),
-      minSeats: details.minSeats
+      minSeats: details.minSeats,
     }));
 }
 ```
@@ -154,46 +155,52 @@ ERROR: Coverage for statements (60.81%) does not meet global threshold (70%)
 4. Untuk mendemonstrasikan perbaikan pada PR yang sama, tambahkan unit test **`backend/tests/unit/promo.service.test.js`** lalu jalankan kembali `npm run test:coverage` agar pipeline kembali lulus Quality Gate:
 
 ```javascript
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from "vitest";
 import {
   validatePromoCode,
   applyPromoDiscount,
-  listActivePromos
-} from '../../src/services/promo.service.js';
+  listActivePromos,
+} from "../../src/services/promo.service.js";
 
-describe('promo.service unit tests', () => {
-  it('validates active promo codes and rejects invalid/expired ones', () => {
-    expect(validatePromoCode('campus20', 2)).toEqual({
-      code: 'CAMPUS20',
+describe("promo.service unit tests", () => {
+  it("validates active promo codes and rejects invalid/expired ones", () => {
+    expect(validatePromoCode("campus20", 2)).toEqual({
+      code: "CAMPUS20",
       discountRate: 0.2,
       minSeats: 2,
-      active: true
+      active: true,
     });
-    expect(() => validatePromoCode('', 1)).toThrow('Promo code must be a non-empty string');
-    expect(() => validatePromoCode('UNKNOWN', 1)).toThrow('Promo code not found');
-    expect(() => validatePromoCode('EXPIRED50', 2)).toThrow('Promo code is no longer active');
-    expect(() => validatePromoCode('CAMPUS20', 1)).toThrow(
-      'Seat quantity does not meet promo requirement'
+    expect(() => validatePromoCode("", 1)).toThrow(
+      "Promo code must be a non-empty string",
+    );
+    expect(() => validatePromoCode("UNKNOWN", 1)).toThrow(
+      "Promo code not found",
+    );
+    expect(() => validatePromoCode("EXPIRED50", 2)).toThrow(
+      "Promo code is no longer active",
+    );
+    expect(() => validatePromoCode("CAMPUS20", 1)).toThrow(
+      "Seat quantity does not meet promo requirement",
     );
   });
 
-  it('applies promo discount accurately', () => {
-    const result = applyPromoDiscount(700000, 'CAMPUS20', 2);
+  it("applies promo discount accurately", () => {
+    const result = applyPromoDiscount(700000, "CAMPUS20", 2);
     expect(result).toEqual({
-      promoCode: 'CAMPUS20',
+      promoCode: "CAMPUS20",
       discountRate: 0.2,
       discountAmount: 140000,
-      finalPrice: 560000
+      finalPrice: 560000,
     });
-    expect(() => applyPromoDiscount(0, 'CAMPUS20', 2)).toThrow(
-      'Subtotal must be a positive number'
+    expect(() => applyPromoDiscount(0, "CAMPUS20", 2)).toThrow(
+      "Subtotal must be a positive number",
     );
   });
 
-  it('lists only active promos', () => {
+  it("lists only active promos", () => {
     expect(listActivePromos()).toEqual([
-      { code: 'EARLYBIRD10', discountPercent: 10, minSeats: 1 },
-      { code: 'CAMPUS20', discountPercent: 20, minSeats: 2 }
+      { code: "EARLYBIRD10", discountPercent: 10, minSeats: 1 },
+      { code: "CAMPUS20", discountPercent: 20, minSeats: 2 },
     ]);
   });
 });
